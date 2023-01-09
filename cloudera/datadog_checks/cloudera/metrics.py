@@ -49,6 +49,10 @@ TIMESERIES_METRICS = {
         'await_read_time',
         'await_write_time',
     ],
+    "service": [
+        'total_bytes_read_rate_across_datanodes',
+        'total_bytes_written_rate_across_datanodes',
+    ],
 }
 
 NATIVE_METRICS = {

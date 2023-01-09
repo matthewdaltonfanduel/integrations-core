@@ -28,6 +28,7 @@ class ApiClientV7(ApiClient):
                 tags = self._collect_cluster_tags(cluster, self._check.config.tags)
 
                 executor.submit(self._collect_cluster_metrics, cluster_name, tags)
+                executor.submit(self._collect_service_metrics, cluster_name, tags)
                 executor.submit(self._collect_hosts, cluster_name)
                 self._collect_cluster_service_check(cluster, tags)
 
@@ -49,6 +50,15 @@ class ApiClientV7(ApiClient):
     def _collect_cluster_metrics(self, cluster_name, tags):
         metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['cluster'])
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
+        self._query_time_series(query, tags=tags)
+
+    def _collect_service_metrics(self, cluster_name, tags):
+        metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['service'])
+        query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=SERVICE'
+        
+        # Should also append additional tags, i.e. cloudera_cluster
+        tags.append(f"cloudera_cluster:{cluster_name}")
+        
         self._query_time_series(query, tags=tags)
 
     def _collect_hosts(self, cluster_name):
