@@ -23,6 +23,7 @@ from .common import (
     check_bgw_metrics,
     check_common_metrics,
     check_connection_metrics,
+    check_conflict_metrics,
     check_db_count,
     check_slru_metrics,
     requires_static_version,
@@ -42,6 +43,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
+    check_conflict_metrics(aggregator, expected_tags=expected_tags)
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
 
@@ -257,23 +259,6 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
     assert_metric_at_least(aggregator, 'postgresql.activity.xact_start_age', 'app:test', 1, transaction_age_lower_bound)
-
-
-def test_database_conflicts_metrics(aggregator, integration_check, pg_instance):
-    check = integration_check(pg_instance)
-    check.check(pg_instance)
-
-    conflict_metrics = [
-        'postgresql.conflicts.tablespace',
-        'postgresql.conflicts.lock',
-        'postgresql.conflicts.snapshot',
-        'postgresql.conflicts.bufferpin',
-        'postgresql.conflicts.deadlock',
-    ]
-
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
-    for name in conflict_metrics:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
 @requires_over_10

@@ -51,6 +51,14 @@ DBM_MIGRATED_METRICS = [
     'postgresql.connections',
 ]
 
+CONFLICT_METRICS = [
+    'postgresql.conflicts.tablespace',
+    'postgresql.conflicts.lock',
+    'postgresql.conflicts.snapshot',
+    'postgresql.conflicts.bufferpin',
+    'postgresql.conflicts.deadlock',
+]
+
 COMMON_BGW_METRICS = [
     'postgresql.bgwriter.checkpoints_timed',
     'postgresql.bgwriter.checkpoints_requested',
@@ -109,6 +117,15 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
         activity_metrics.append('postgresql.activity.backend_xmin_age')
     for name in activity_metrics:
         aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
+
+
+def check_conflict_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 9.1:
+        return
+    for db in COMMON_DBS:
+        db_tags = expected_tags + ['db:{}'.format(db)]
+        for name in CONFLICT_METRICS:
+            aggregator.assert_metric(name, count=count, tags=db_tags)
 
 
 def check_bgw_metrics(aggregator, expected_tags, count=1):
