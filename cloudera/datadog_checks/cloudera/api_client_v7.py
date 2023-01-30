@@ -38,6 +38,7 @@ class ApiClientV7(ApiClient):
             )
         else:
             self._clusters_discovery = None
+            # test
 
     def collect_data(self):
         self._collect_clusters()
