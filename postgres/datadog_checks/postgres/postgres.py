@@ -372,7 +372,7 @@ class PostgreSql(AgentCheck):
         if self._config.collect_count_metrics:
             metric_scope.append(self.metrics_cache.get_count_metrics())
         if self.version >= V9_6:
-            metric_scope.append([WAL_RECEIVER_METRICS, WAL_RECEIVER_COUNT_METRICS])
+            metric_scope += [WAL_RECEIVER_METRICS, WAL_RECEIVER_COUNT_METRICS]
         if self.version >= V13:
             metric_scope.append(SLRU_METRICS)
 
