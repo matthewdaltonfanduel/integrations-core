@@ -144,6 +144,8 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
 
 
 def check_stat_replication(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) <= 10:
+        return
     replication_tags = expected_tags + [
         'wal_app_name:walreceiver',
         'wal_client_addr:{}'.format(get_container_ip(REPLICA_CONTAINER_NAME)),
@@ -155,11 +157,15 @@ def check_stat_replication(aggregator, expected_tags, count=1):
 
 
 def check_wal_receiver_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 9.6:
+        return
     for (metric_name, _) in WAL_RECEIVER_METRICS['metrics'].values():
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['status:streaming'])
 
 
 def check_wal_receiver_count_metrics(aggregator, expected_tags, count=1, value=None):
+    if float(POSTGRES_VERSION) < 9.6:
+        return
     for (metric_name, _) in WAL_RECEIVER_COUNT_METRICS['metrics'].values():
         aggregator.assert_metric(metric_name, count=count, value=value, tags=expected_tags)
 

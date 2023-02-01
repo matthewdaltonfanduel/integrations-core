@@ -19,6 +19,7 @@ from .common import (
     check_wal_receiver_count_metrics,
     check_wal_receiver_metrics,
 )
+from .utils import requires_over_96
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -42,6 +43,7 @@ def test_common_replica_metrics(aggregator, integration_check, pg_replica_instan
     aggregator.assert_all_metrics_covered()
 
 
+@requires_over_96
 def test_wal_receiver_metrics(aggregator, integration_check, pg_replica_instance):
     check = integration_check(pg_replica_instance)
     expected_tags = pg_replica_instance['tags'] + ['port:{}'.format(pg_replica_instance['port']), 'status:streaming']
